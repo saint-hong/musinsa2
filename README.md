@@ -23,6 +23,12 @@ from scrapy.http import TextResponse
 ## 2. 사용 방법
 
 무신사 웹 사이트 크롤러는 Scrapy의 작동 방식으로 구현 됩니다.
+  - 1). Startproject 파일 생성
+  - 2). Items.py 파일 생성
+  - 3). Spider 파일 생성
+  - 4). CSV 파일 저장
+  - 5). 데이터 베이스 저장 (Mongo
+  - 6). Pipeline 생성
 
 ### 2-1. Scrapy Startproject 파일 생성
 ```
@@ -172,7 +178,32 @@ class Spider(scrapy.Spider):
         yield item
 ```
 
+### 2-4. CSV 파일 생성
 
+카테고리 값에 해당하는 값을 CSV 파일로 나누어 저장 할 수 있습니다. 
+
+```
+%%writefile run.sh
+cd musinsa
+scrapy crawl MusinsaRanking -o mr_1w_5p_001.csv -a category=001 #상 의 데이터 파일
+scrapy crawl MusinsaRanking -o mr_1w_5p_002.csv -a category=002 #아우터 데이터 파일
+```
+
+### 2-5. 데이터 베이스 저장 (MongoDB)
+
+MongoDB 데이터 베이스에 수집한 데이터를 저장할 수 있습니다. 
+  - mongodb의 서버 주소는 변경하여 사용하면 됩니다.
+  - 데이터베이스와 컬렉션 이름을 변경하여 사용 할 수 있습니다. 
+  - (ex) db = client.musinsa, collection = db.musinsa_df
+
+```
+%%writefile musinsa/musinsa/mongodb.py
+import pymongo
+
+client = pymongo.MongoClient('mongodb://**.***.***.**:2701*/')
+db = client.mr_1w_5p_001_002
+collection = db.data
+```
 
 
 
