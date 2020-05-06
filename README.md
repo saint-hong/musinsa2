@@ -1,5 +1,11 @@
 # Musinsa Web-Site Crawler
 
+# 목차
+- 1. 개요
+- 2. 사용방법
+- 3. 수집한 데이터 확인
+- 4. 주의 
+
 ## 1. 개요
 무신사 웹 사이트 크롤러는 크롤링 프로젝트의 목적으로 만든 Scrapy를 활용한 웹 크롤러 입니다. 무신사 웹사이트 크롤러는 랭킹 페이지에 등록 된 상품의 브랜드명, 카테고리, 상품명, 상품번호, 상품의 성별, 판매가, 세일가, 좋아요 개수, 리뷰 개수, 주요 구매고객, 링크 데이터를 수집하고, 수집한 데이터를 데이터 베이스와 CSV 파일로 저장, 슬랙 메신저에 메시지를 보낼 수 있습니다. 
 
@@ -298,7 +304,46 @@ top_outer_dfs = [pd.read_csv("musinsa/mr_1w_5p_{}.csv".format(category)) for cat
 ```
 
 
-출력결과
+출력결과 상의 (001) 438개, 아우터 (002) 449 개
 ```
 [('001', 438), ('002', 449)]
 ```
+
+### 3-3. 수집한 데이터를 데이터프레임으로 변환
+
+수집한 데이터 CSV 파일을 불러와 데이터프레임으로 변환할 수 있습니다. 
+
+```
+file = !ls ./musinsa # 해당 디렉토리의 파일명을 file 변수 선언
+
+top_df = pd.read_csv("musinsa/{}".format(file[1])) # 상의 데이터 프레임
+top_df = top_df[["ranking", "product_spec", "brand_name", "product_name", "product_num", 
+    "gender", "origin_price", "sale_price", "good_num", "review_count", "target_name", "link"]]
+
+outer_df = pd.read_csv("musinsa/{}".format(file[2])) # 아우터 데이터 프레임
+outer_df = outer_df[["ranking", "product_spec", "brand_name", "product_name", "product_num", 
+    "gender", "origin_price", "sale_price", "good_num", "review_count", "target_name", "link"]]
+
+top_outer_df = pd.concat([top_df, outer_df])
+top_outer_df.reset_index(drop=True, inplace=True)
+```
+
+
+```
+	ranking	product_spec	brand_name	product_name	product_num	gender	origin_price	sale_price	good_num	review_count	target_name	link
+882	NaN	아우터 / 나일론/코치 재킷	NIKE	아카데미 바람막이 자켓 블랙	2325968	NaN	129,000	99,000	(결제완료-반품)	-	19~24 , 남성	https://store.musinsa.com/app/product/detail/1...
+883	NaN	아우터 / 카디건	OiOi	HEART LOGO KNIT CARDIGAN_navy	OI20SS_07	여	92,000	73,600	943	94	19~24 , 여성	https://store.musinsa.com/app/product/detail/1...
+884	NaN	아우터 / 후드 집업	LAFUDGESTORE	[썸머 ver.][SET] 오디너리 아마드 후드집업 셋업_Metal Black	f-1004	남	82,000	65,600	594	31	25~34 , 남성	https://store.musinsa.com/app/product/detail/1...
+885	NaN	아우터 / 블루종/MA-1	ALPHA INDUSTRIES	MA-1 레귤러핏 - 세이지 그린 / MJM21000C1-SGR	MJM21000C1-SGR	남	215,000	기획전	2,429	5,599	25~34 , 남성	https://store.musinsa.com/app/product/detail/4...
+886	NaN	아우터 / 수트/블레이저 재킷	SIGNATURE	[여름원단추가]세미오버핏 싱글 블레이저 자켓[검정]	BL-004	남	159,000	73,000	9,637	4,995	19~24 , 남성	https://store.musinsa.com/app/product/detail/7...
+```
+
+## 4. 주의 사항
+Scrapy를 사용하여 데이터를 크롤링 할 시, 데이터 요청과 응답 과정에서 디버깅이 발생 할 수 있습니다. 디버깅이 발생할 경우 데이터 수집의 로딩이
+중단 되지 않는 오류가 발생합니다.
+
+settings.py 의 AUTOTHROTTLE 설정을 변경하여, 스크래피의 요청, 응답 과정을 자동으로 안정화 할 수 있습니다.
+
+1) 디렉터리의 settings.py 열기
+2) AUTOTHROTTLE_ENABLED = True / AUTOTHROTTLE_TARGET_CONCURRENCY = 1.0 을 활성화
+3) AUTOTHROTTLE_TARGET_CONCURRENCY 값을 높여준다. (ex) "2.0" 
