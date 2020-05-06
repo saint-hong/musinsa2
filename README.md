@@ -54,18 +54,18 @@ import scrapy
 
 
 class MusinsaItem(scrapy.Item):
-    ranking = scrapy.Field()
-    brand_name = scrapy.Field()
-    product_name = scrapy.Field()
-    product_num = scrapy.Field()
-    product_spec = scrapy.Field()
-    gender = scrapy.Field()
-    origin_price = scrapy.Field()
-    sale_price = scrapy.Field()
-    good_num = scrapy.Field()
-    review_count = scrapy.Field()
-    target_name = scrapy.Field()
-    link = scrapy.Field()
+    ranking = scrapy.Field()       # 랭킹 순위
+    brand_name = scrapy.Field()    # 브랜드명
+    product_name = scrapy.Field()  # 상품명
+    product_num = scrapy.Field()   # 상품번호
+    product_spec = scrapy.Field()  # 상품의 카테고리
+    gender = scrapy.Field()        # 상품의 타겟 성별
+    origin_price = scrapy.Field()  # 판매가
+    sale_price = scrapy.Field()    # 세일가
+    good_num = scrapy.Field()      # 좋아요 개수
+    review_count = scrapy.Field()  # 리뷰 개수
+    target_name = scrapy.Field()   # 주요 구매 고객
+    link = scrapy.Field()          # 링크 
 ```
 
 ### 2-3. Spider 설정
