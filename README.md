@@ -205,6 +205,100 @@ db = client.mr_1w_5p_001_002
 collection = db.data
 ```
 
+### 2-6. Pipeline 생성
+
+pipeline 파일을 생성하여, 크롤러가 데이터를 수집 후에 수행할 작업들을 설정 할 수 있습니다. 
+현재 이 pipeline은 mongodb에 수집한 데이터를 저장하며, 슬랙 메신저에 설정한 키워드에 맞는 상품 데이터를 전송하게끔 설정 되었습니다. 
+  - icomming 웹 훅 url을 변경하여 사용할 수 있습니다.
+  - self.keyword 값이 수집한 Item 데이터에 있으면, 해당 키워드의 데이터가 전송 됩니다.
+  - self.keyword 값과 item[" "] 값을 변경하여 사용할 수 있습니다.
+  - 전송할 데이터의 값을 변경할 수 있습니다.
+
+```
+%%writefile musinsa/musinsa/pipelines.py
+import json
+import requests
+from .mongodb import collection
 
 
+class MusinsaRankingPipeline(object):
+    
+    def __init__(self):
+        self.webhook_url = "https://hooks.slack.com/services/~~~"
+        self.keyword = "THISISNEVERTHAT"
+    
+    def send_msg(self, msg):
+        payload = {
+            "channel": "#musinsa_crawling.",
+            "username": "sainthong",
+            "text": msg,
+        }
+        
+        requests.post(self.webhook_url, json.dumps(payload))
+        time.sleep(1)
+    
+    def process_item(self, item, spider):
+        data = {
+            "product_spec": item["product_spec"],
+            "brand_name": item["brand_name"],
+            "product_name": item["product_name"],
+            "product_num": item["product_num"],
+            "gender": item["gender"],
+            "origin_price": item["origin_price"],
+            "sale_price": item["sale_price"],
+            "good_num": item["good_num"],
+            "review_count": item["review_count"],
+            "target_name": item["target_name"],
+            "link":item["link"]
+        }
+        
+        collection.insert(data)
+        
+        if self.keyword in item["brand_name"]:
+            self.send_msg("카테고리 : {},     브랜드명 : {},     상품명 : {},     판매가격 : {},     세일가격 : {},     좋아요 : {},     링크 : {}"
+                          .format(item["product_spec"], item["brand_name"], item["product_name"], item["origin_price"], item["sale_price"], item["good_num"], item["link"]))
+        
+        return item
+```
 
+## 3. 수집한 데이터 확인
+
+수집한 데이터의 CSV 파일을 DataFrame 으로 변환하여, 데이터 분석을 할 수 있습니다. 
+
+### 3-1. 데이터 확인
+
+수집한 데이터의 카테고리 값을 변수로 설정하여, 각각 저장된 CSV 파일을 합하여 확인 할 수 있습니다.
+```
+import pandas as pd
+
+categories = ["001", "002"]
+top_outer_dfs = [pd.read_csv("musinsa/mr_1w_5p_{}.csv".format(category)) for category in categories]
+```
+
+출력결과 (데이터 정렬은 안 되어 있음)
+```
+[             brand_name gender   good_num  \
+ 0          GROOVE RHYME      남      6,862   
+ 1                   LMC      남      4,172   
+ 2    NATIONALGEOGRAPHIC      남      9,543   
+ 3                   LMC      남      5,869   
+ 4                 JEMUT      남      6,765   
+ 5    NATIONALGEOGRAPHIC      남      6,976   
+ 6      MUSINSA STANDARD      남     13,878   
+ 7      MUSINSA STANDARD      남      7,836
+ ...
+```
+
+### 3-2. 수집한 데이터의 수 확인
+
+수집한 데이터의 카테고리별 데이터 수를 확인 할 수 있습니다.
+
+```
+[(category, len(df)) for category, df in zip(categories, top_outer_dfs)]
+```
+
+
+출력결과
+```
+[('001', 438), ('002', 449)]
+```
