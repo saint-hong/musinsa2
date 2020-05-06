@@ -18,6 +18,46 @@ import re
 from scrapy.http import TextResponse
 ```
 
-무신사 웹 사이트의 다양한 상품군의 데이터를 수집하여, 베스트 상품의 특징, 고객 층별 상품의 특징, 기획 상품의 특징 등을 파악해볼 수 있을 것입니다.
+무신사 웹 사이트 크롤러를 사용하면, 랭킹에 오른 상품의 특징, 고객 층별 상품의 특징, 기획 상품의 특징 등을 파악할 수 있는 자료를 수집할 수 있습니다.
 
-## 2. 데이터 수
+## 2. 사용 방법
+
+무신사 웹 사이트 크롤러는 Scrapy의 작동 방식으로 구현 됩니다.
+
+### 2-1. Scrapy Startproject 파일 생성
+```
+!scrapy startproject musinsa
+```
+
+### 2-2. Items.py 생성
+  - 필요한 데이터에 맞게 아래 양식대로 추가 하면 됩니다. 
+  - (ex) 상품의 누적 판매 수 : total_sales = scrapy.Field()
+  
+```
+%%writefile musinsa/musinsa/items.py
+import scrapy
+
+
+class MusinsaItem(scrapy.Item):
+    ranking = scrapy.Field()
+    brand_name = scrapy.Field()
+    product_name = scrapy.Field()
+    product_num = scrapy.Field()
+    product_spec = scrapy.Field()
+    gender = scrapy.Field()
+    origin_price = scrapy.Field()
+    sale_price = scrapy.Field()
+    good_num = scrapy.Field()
+    review_count = scrapy.Field()
+    target_name = scrapy.Field()
+    link = scrapy.Field()
+```
+
+
+
+
+
+
+
+
+
